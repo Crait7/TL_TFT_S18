@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>S18羁绊天梯 · Crait7</title>
+<style>
+:root{--bg:#000;--ink:#fff;--muted:#777;--line:#1e1e1e;--dim:#444}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  background:#000;color:#fff;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+}
+a{color:#fff;text-decoration:none}
+
+/* backdrop marquee */
+.mq{
+  position:fixed;left:0;width:200%;pointer-events:none;z-index:0;
+  font-weight:900;letter-spacing:.4em;white-space:nowrap;color:#fff;opacity:.04;
+  font-size:clamp(32px,7vw,72px);user-select:none;
+}
+.mq.a{top:6vh;animation:mv 50s linear infinite}
+.mq.b{top:42vh;animation:mv 70s linear infinite reverse}
+.mq.c{top:76vh;animation:mv 44s linear infinite}
+@keyframes mv{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+.wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:24px 16px 48px}
+
+/* header — minimal */
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.brand h1{
+  margin:0;font-size:clamp(28px,6vw,44px);font-weight:900;letter-spacing:-.03em;line-height:1;
+}
+.brand .sub{margin-top:6px;font-size:11px;letter-spacing:.28em;color:var(--muted)}
+.live{
+  font-size:11px;color:var(--muted);letter-spacing:.12em;border:1px solid var(--line);
+  padding:6px 12px;border-radius:999px;animation:pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+.grid{display:grid;grid-template-columns:240px 1fr;gap:14px}
+@media(max-width:820px){.grid{grid-template-columns:1fr}}
+
+.panel{
+  background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:18px;padding:14px;
+}
+.panel-title{
+  font-size:10px;letter-spacing:.22em;color:var(--dim);margin:0 0 12px;text-transform:uppercase;
+}
+
+/* controls — compact */
+.field{margin-bottom:10px}
+.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
+.row{display:flex;gap:8px;align-items:center}
+select,input[type=number]{
+  width:100%;background:#0c0c0c;color:#fff;border:1px solid #2a2a2a;border-radius:10px;
+  padding:8px 10px;font-size:13px;outline:none;
+}
+select:focus,input[type=number]:focus{border-color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{
+  display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;
+  border:1px solid #2a2a2a;font-size:11px;color:#ccc;cursor:pointer;user-select:none;
+  transition:border-color .2s,background .2s,transform .15s;
+}
+.chip:hover{transform:translateY(-1px);border-color:#fff}
+.chip.on{border-color:#fff;background:rgba(255,255,255,.1);color:#fff}
+.chip img{width:16px;height:16px;border-radius:3px;object-fit:cover}
+.switches{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.switches label{
+  display:flex;align-items:center;gap:8px;font-size:12px;color:#ddd;cursor:pointer;margin:0;
+}
+.switches input{accent-color:#fff}
+.btn{
+  width:100%;margin-top:12px;background:#fff;color:#000;border:none;border-radius:999px;
+  padding:12px;font-weight:800;font-size:13px;letter-spacing:.14em;cursor:pointer;
+  transition:transform .2s,box-shadow .25s,letter-spacing .25s;
+}
+.btn:hover{transform:translateY(-2px);letter-spacing:.2em;box-shadow:0 12px 40px rgba(255,255,255,.12)}
+.btn:disabled{opacity:.45;transform:none;cursor:wait}
+.status{margin-top:8px;font-size:11px;color:var(--muted);min-height:16px;font-variant-numeric:tabular-nums}
+
+/* result score */
+.score-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap}
+.score-num{
+  font-size:56px;font-weight:900;line-height:1;letter-spacing:-.04em;
+  background:linear-gradient(180deg,#fff,#555);-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:pop .4s ease;
+}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.score-meta{font-size:12px;color:var(--muted);line-height:1.5}
+.score-meta b{color:#fff}
+
+/* icon strip */
+.strip{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px;min-height:28px}
+.ico{
+  position:relative;width:36px;height:36px;border-radius:10px;overflow:visible;cursor:default;
+  border:1px solid #2a2a2a;background:#0a0a0a;
+  transition:transform .2s,border-color .2s,box-shadow .2s;
+  animation:fadeUp .35s ease both;
+}
+.ico img{width:100%;height:100%;object-fit:cover;border-radius:9px;display:block}
+.ico:hover{
+  transform:translateY(-4px) scale(1.08);border-color:#fff;z-index:5;
+  box-shadow:0 10px 28px rgba(255,255,255,.12);
+}
+.ico .tip{
+  position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%) translateY(4px);
+  background:#fff;color:#000;font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;
+  white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;
+  z-index:20;
+}
+.ico:hover .tip{opacity:1;transform:translateX(-50%) translateY(0)}
+.ico.unit{width:44px;height:44px}
+.ico.lux{border-color:#fff}
+.ico.em::after{
+  content:"";position:absolute;right:-2px;top:-2px;width:8px;height:8px;border-radius:50%;
+  background:#fff;box-shadow:0 0 0 2px #000;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* boards — full portrait, traits below, no clip */
+.board{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:10px;
+}
+.slot{
+  border-radius:12px;border:1px solid #222;background:#090909;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  gap:6px;padding:10px 6px 8px;
+  position:relative;
+  transition:border-color .2s,transform .2s;
+  animation:fadeUp .4s ease both;
+}
+.slot:hover{border-color:#fff;transform:translateY(-3px)}
+.slot img.ava{
+  width:56px;height:56px;border-radius:10px;object-fit:cover;display:block;
+  flex:0 0 auto;background:#111;
+}
+.slot .uname{
+  font-size:10px;color:#ccc;text-align:center;line-height:1.2;flex:0 0 auto;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.slot .cost{
+  position:absolute;right:4px;top:4px;font-size:9px;font-weight:800;color:#000;background:#fff;
+  border-radius:4px;padding:0 4px;line-height:14px;z-index:1;
+}
+.slot.has-em{border-color:#666}
+.slot.has-em img.ava{box-shadow:0 0 0 2px rgba(255,255,255,.35)}
+.slot .trait-row{
+  display:flex;gap:3px;flex-wrap:wrap;justify-content:center;align-items:center;
+  width:100%;min-height:16px;flex:0 0 auto;
+}
+.slot .trait-row img{width:14px;height:14px;border-radius:3px;display:block}
+.slot .trait-row img.em{
+  width:16px;height:16px;border:2px solid #fff;
+  box-shadow:0 0 8px rgba(255,255,255,.75);
+  animation:emGlow 1.6s ease-in-out infinite;
+  border-radius:4px;
+}
+@keyframes emGlow{
+  0%,100%{box-shadow:0 0 6px rgba(255,255,255,.55)}
+  50%{box-shadow:0 0 14px rgba(255,255,255,.95)}
+}
+
+/* emblem allocation panel */
+.em-panel{
+  margin:12px 0 14px;padding:10px 12px;border:1px solid #2a2a2a;border-radius:14px;
+  background:rgba(255,255,255,.03);
+}
+.em-panel .panel-title{margin-bottom:8px}
+.em-list{display:flex;flex-wrap:wrap;gap:8px}
+.em-card{
+  display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:12px;
+  border:1px solid #333;background:#0a0a0a;
+  animation:fadeUp .35s ease both;
+  transition:border-color .2s,transform .2s;
+}
+.em-card:hover{border-color:#fff;transform:translateY(-2px)}
+.em-card img.ava{width:28px;height:28px;border-radius:6px;object-fit:cover}
+.em-card img.tico{
+  width:20px;height:20px;border-radius:4px;border:2px solid #fff;
+  box-shadow:0 0 8px rgba(255,255,255,.7);
+  animation:emGlow 1.6s ease-in-out infinite;
+}
+.em-card .txt{font-size:12px;line-height:1.3}
+.em-card .txt b{font-weight:700}
+.em-card .txt span{color:var(--muted);font-size:11px;display:block}
+.em-empty{font-size:12px;color:var(--muted);padding:4px 0}
+
+.note-row{
+  margin:10px 0 0;font-size:12px;color:var(--muted);line-height:1.6;
+}
+.note-row b{color:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.legend .ico{width:28px;height:28px}
+.legend .ico .tip{font-size:10px}
+
+.empty{
+  color:var(--muted);text-align:center;padding:40px 12px;font-size:13px;
+  border:1px dashed #222;border-radius:16px;
+}
+
+/* author */
+.author{margin-top:36px;border-top:1px solid var(--line);padding-top:28px;text-align:center}
+.author-card{
+  display:inline-flex;align-items:center;gap:14px;text-align:left;
+  background:#050505;border:1px solid #222;border-radius:20px;padding:16px 20px;
+  transition:transform .3s,border-color .3s,box-shadow .3s;
+}
+.author-card:hover{transform:translateY(-4px);border-color:#fff;box-shadow:0 16px 48px rgba(255,255,255,.08)}
+.ava-wrap{position:relative}
+.ava-wrap::before{
+  content:"";position:absolute;inset:-5px;border-radius:50%;
+  border:1px dashed rgba(255,255,255,.35);animation:spin 14s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ava{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #fff;display:block}
+.aname{font-weight:800;font-size:18px}
+.aname i{
+  display:inline-block;width:6px;height:6px;border-radius:50%;background:#fff;margin-left:8px;
+  animation:pulse 1.6s ease-in-out infinite;font-style:normal;vertical-align:middle;
+}
+.arole{font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:.08em}
+.alinks{margin-top:8px;display:flex;gap:8px}
+.alinks a{
+  font-size:11px;padding:5px 10px;border-radius:999px;border:1px solid #333;color:#ddd;
+  transition:all .2s;
+}
+.alinks a:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.06)}
+.afoot{margin-top:16px;font-size:10px;color:var(--dim);letter-spacing:.2em}
+.note{
+  margin-top:14px;font-size:11px;color:var(--dim);line-height:1.7;text-align:center;
+}
+</style>
+</head>
+<body>
+<div class="mq a">S18 TRAIT LADDER S18 TRAIT LADDER S18 TRAIT LADDER S18 TRAIT LADDER </div>
+<div class="mq b">CRAIT7 CRAIT7 CRAIT7 CRAIT7 CRAIT7 CRAIT7 CRAIT7 CRAIT7 CRAIT7 CRAIT7 </div>
+<div class="mq c">羁绊天梯 羁绊天梯 羁绊天梯 羁绊天梯 羁绊天梯 羁绊天梯 羁绊天梯 羁绊天梯 </div>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="brand">
+      <h1>S18羁绊天梯</h1>
+      <div class="sub">TRAIT LADDER · ENCHANTED WILDS</div>
+    </div>
+    <div class="live">头像=英雄面部图 · 悬停看中文名</div>
+  </header>
+
+  <div class="grid">
+    <aside class="panel">
+      <div class="panel-title">Board</div>
+      <div class="field">
+        <label>人口</label>
+        <input type="number" id="slots" min="1" max="20" value="11" />
+      </div>
+      <div class="field">
+        <label>转职</label>
+        <select id="emblemMode">
+          <option value="none">无</option>
+          <option value="any2" selected>任意 ×2</option>
+          <option value="any1">任意 ×1</option>
+          <option value="fixed">指定</option>
+        </select>
+      </div>
+      <div id="fixedBox" class="field" style="display:none">
+        <label>指定羁绊</label>
+        <div class="chips" id="emblemChips"></div>
+      </div>
+      <div class="field">
+        <label>拉克丝</label>
+        <select id="luxMode">
+          <option value="on" selected>双计 ×2</option>
+          <option value="off">关闭</option>
+        </select>
+      </div>
+      <div class="switches">
+        <label><input type="checkbox" id="countRival" checked /> 宿敌</label>
+        <label><input type="checkbox" id="countFlora" checked /> 绝命花妖</label>
+        <label><input type="checkbox" id="preferLux" /> 优先有效拉克丝</label>
+        <label><input type="checkbox" id="fastMode" checked /> 快速</label>
+      </div>
+      <button class="btn" id="btnRun">开始冲榜</button>
+      <div class="status" id="status">就绪</div>
+    </aside>
+
+    <main class="panel">
+      <div class="panel-title">Result</div>
+      <div id="resultBody">
+        <div class="empty">设定人口与转职后开始冲榜</div>
+      </div>
+    </main>
+  </div>
+
+  <div class="note">
+    悬停棋子/羁绊图标显示中文名 · 唯一羁绊不计入 · 拉克丝所选源系按 2 计
+  </div>
+</div>
+
+<footer class="author">
+  <div class="author-card">
+    <div class="ava-wrap">
+      <img class="ava" src="https://avatars.githubusercontent.com/u/61241144?v=4" alt="Crait7" />
+    </div>
+    <div>
+      <div class="aname">Crait7<i></i></div>
+      <div class="arole">S18羁绊天梯 · Creator</div>
+      <div class="alinks">
+        <a href="https://github.com/Crait7" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://github.com/Crait7" target="_blank" rel="noreferrer">@Crait7</a>
+      </div>
+    </div>
+  </div>
+  <div class="afoot">C R A I T 7 · S 1 8 · T R A I T</div>
+</footer>
+
+<script>
+/* ===== data ===== */
+const CN = {
+  Adaptor:"魔战士",Brawler:"斗士",Defender:"护卫",Executioner:"裁决使",Hunter:"猎人",
+  Invoker:"神谕",Juggernaut:"主宰",Rapidfire:"迅捷射手",Ravager:"狂战士",Spellweaver:"法师",
+  Summoner:"召唤师",Vanguard:"重装战士",Blossom:"灵魂莲华",Coven:"魔女",Elderwood:"永恒之森",
+  Blackthorn:"黑荆棘",Fae:"花仙子","Flora Fatalis":"绝命花妖",Inferno:"地狱火",Lunar:"月蚀骑士",
+  Primal:"野兽之灵",Riftbeast:"峡谷野怪",Solar:"日蚀骑士",Sprykin:"约德尔人和朋友",Rival:"宿敌",
+  Caustic:"帝王斑蝶",Monolith:"魔岩巨兽","Apex Predator":"顶级掠食者",Greenfather:"翠神",
+  "Old Growth":"远古树精",Thornmaiden:"荆棘之兴",Attuned:"月华神女",Avatar:"自然之力！大元素使",
+  "Bounty Seeker":"赏金猎人","Emerald Aspect":"宝石骑士"
+};
+const UNIQUE = new Set(["Attuned","Avatar","Bounty Seeker","Emerald Aspect","Monolith","Old Growth","Thornmaiden","Caustic","Greenfather","Apex Predator"]);
+const BP = {
+  Adaptor:2,Brawler:2,Defender:2,Executioner:2,Hunter:2,Invoker:2,Juggernaut:2,Rapidfire:2,Ravager:2,Spellweaver:2,Summoner:2,Vanguard:2,
+  Blossom:3,Coven:3,Elderwood:3,Blackthorn:2,Fae:2,"Flora Fatalis":1,Inferno:2,Lunar:2,Primal:2,Riftbeast:3,Solar:3,Sprykin:3,Rival:1
+};
+/* 羁绊图标：tactics.tools 羁绊图标（非技能图）；悬停显示中文 */
+const TICO_BASE="https://ap.tft.tools/static/trait-icons/";
+const TICO={
+  Adaptor:TICO_BASE+"da_18_adaptor_w.svg",
+  Brawler:TICO_BASE+"da_18_brawler_w.svg",
+  Defender:TICO_BASE+"da_18_defender_w.svg",
+  Executioner:TICO_BASE+"da_18_executioner_w.svg",
+  Hunter:TICO_BASE+"da_18_hunter_w.svg",
+  Invoker:TICO_BASE+"da_18_invoker_w.svg",
+  Juggernaut:TICO_BASE+"da_juggernaut18_w.svg",
+  Rapidfire:TICO_BASE+"da_18_rapidfire_w.svg",
+  Ravager:TICO_BASE+"da_18_slayer_w.svg",
+  Spellweaver:TICO_BASE+"da_18_spellweaver_w.svg",
+  Summoner:TICO_BASE+"da_18_summoner_w.svg",
+  Vanguard:TICO_BASE+"da_18_vanguard_w.svg",
+  Blossom:TICO_BASE+"da_18_blossom_w.svg",
+  Coven:TICO_BASE+"da_18_coven_w.svg",
+  Elderwood:TICO_BASE+"da_18_elderwood_w.svg",
+  Blackthorn:TICO_BASE+"da_18_blackthorn_w.svg",
+  Fae:TICO_BASE+"da_18_fae_w.svg",
+  "Flora Fatalis":TICO_BASE+"da_florafatalis18_w.svg",
+  Inferno:TICO_BASE+"da_18_inferno_w.svg",
+  Lunar:TICO_BASE+"da_18_lunar_w.svg",
+  Primal:TICO_BASE+"da_primal18_w.svg",
+  Riftbeast:TICO_BASE+"da_riftbeast18_w.svg",
+  Solar:TICO_BASE+"da_18_solar_w.svg",
+  Sprykin:TICO_BASE+"da_18_sprykin_w.svg",
+  Rival:TICO_BASE+"da_18_rival_w.svg",
+  Caustic:TICO_BASE+"da_18_caustic_w.svg",
+  Monolith:TICO_BASE+"da_18_battlemage_w.svg",
+  "Apex Predator":TICO_BASE+"da_18_apexpredator_w.svg",
+  Greenfather:TICO_BASE+"da_18_greenfather_w.svg",
+  "Old Growth":TICO_BASE+"da_18_maokai_uniquetrait_w.svg",
+  Thornmaiden:TICO_BASE+"da_18_zyrauniquetrait_w.svg",
+  Attuned:TICO_BASE+"da_aluneuniquetrait18_w.svg",
+  Avatar:TICO_BASE+"da_18_luxuniquetrait_w.svg",
+  "Bounty Seeker":TICO_BASE+"da_dravenuniquetrait18_w.svg",
+  "Emerald Aspect":TICO_BASE+"da_emerald18_w.svg"
+};
+/* 英雄头像：tactics.tools 面部图（非技能图）；Community Dragon 作备选 */
+const FACE_BASE="https://ap.tft.tools/img/gg17/face/";
+const CD_BASE="https://raw.communitydragon.org/latest/game/assets/characters/";
+const FACE={
+  Akali:"da_18_akali_ad.jpg",Camille:"da_18_camille.jpg",Cinderling:"da_cinderling18.jpg",
+  Karma:"da_karma18.jpg",Kobuko:"da_18_kobuko.jpg",Leona:"da_18_leona.jpg",Ornn:"da_18_ornn.jpg",
+  Pebbles:"da_18_sentry.jpg",Rakan:"da_18_rakan.jpg","Rek'Sai":"da_18_reksai.jpg",
+  Varus:"da_18_varus.jpg",Veigar:"da_18_veigar.jpg",Xayah:"da_18_xayah.jpg",Yorick:"da_18_yorick.jpg",
+  Alistar:"da_18_alistar.jpg",Caitlyn:"da_18_caitlyn.jpg",Elise:"da_18_elise.jpg",Gromp:"da_gromp18_ap.jpg",
+  Kayle:"da_18_kayle.jpg",LeBlanc:"da_18_leblanc.jpg",Murkwolf:"da_murkwolf18.jpg",
+  Scuttlecrab:"da_scuttlecrab18.jpg",Sejuani:"da_18_sejuani.jpg",Shen:"da_18_shen.jpg",
+  Teemo:"da_18_teemo.jpg",Warwick:"da_18_warwick.jpg",Yunara:"da_18_yunara.jpg",Azir:"da_18_azir.jpg",
+  Cassiopeia:"da_18_cassiopeia.jpg",Diana:"da_18_diana.jpg",Fiddlesticks:"da_fiddlesticks18.jpg",
+  Hecarim:"da_18_hecarim.jpg","Kha'Zix":"da_18_khazix.jpg","Kog'Maw":"da_kogmaw18_ad.jpg",
+  Krug:"da_krug18.jpg","Master Yi":"da_18_masteryi_ad.jpg",Rammus:"da_18_rammus.jpg",
+  "Mama Beak":"da_crimsonraptor18.jpg",Rengar:"da_18_rengar.jpg",Tristana:"da_18_tristana.jpg",
+  Vi:"da_vi18.jpg",Ahri:"da_18_ahri.jpg",Amumu:"da_amumu18.jpg",Sentinel:"da_sentinel18.jpg",
+  Aphelios:"da_18_aphelios.jpg",Brambleback:"da_brambleback18.jpg",Ezreal:"da_18_ezreal.jpg",
+  Lillia:"da_18_lillia.jpg",Malphite:"da_18_malphite.jpg",Morgana:"da_18_morgana.jpg",
+  Nidalee:"da_nidalee18_ap.jpg",Sett:"da_18_sett.jpg",Sivir:"da_18_sivir.jpg",Soraka:"da_18_soraka.jpg",
+  Zyra:"da_18_zyra.jpg",Alune:"da_18_alune.jpg",Ashe:"da_18_ashe.jpg",Draven:"da_draven18.jpg",
+  "Elder Dragon":"da_18_elderdragon.jpg",Gnar:"da_18_gnarsmall.jpg",Ivern:"da_18_ivern.jpg",
+  Kennen:"da_18_kennen.jpg",Maokai:"da_18_maokai.jpg",Taric:"da_taric18.jpg",
+  "Lux Fae":"da_18_lux_fae.jpg","Lux Coven":"da_18_lux_coven.jpg","Lux Solar":"da_18_lux_sunbeam.jpg",
+  "Lux Primal":"da_18_lux_primal.jpg","Lux Blackthorn":"da_lux18_blackthorn.jpg",
+  "Lux Blossom":"da_lux18_blossom.jpg","Lux Inferno":"da_18_lux_inferno.jpg",
+  "Lux Elderwood":"da_18_lux_elderwood.jpg","Lux Lunar":"da_18_lux_moonbeam.jpg"
+};
+/* Community Dragon 英雄 square 头像（LOL 角色）；拉克丝用 tft18_lux */
+const CD={
+  Akali:"akali",Camille:"camille",Karma:"karma",Leona:"leona",Ornn:"ornn",Rakan:"rakan",
+  Veigar:"veigar",Xayah:"xayah",Yorick:"yorick",Alistar:"alistar",Elise:"elise",Kayle:"kayle",
+  Shen:"shen",Azir:"azir",Fiddlesticks:"fiddlesticks","Kha'Zix":"khazix",Tristana:"tristana",
+  Vi:"vi",Aphelios:"aphelios",Lillia:"lillia",Malphite:"malphite",Morgana:"morgana",
+  Nidalee:"nidalee",Sett:"sett",Soraka:"soraka",Ashe:"ashe",Draven:"draven",Gnar:"gnar",
+  Ivern:"ivern",Kennen:"kennen",Maokai:"maokai",Taric:"taric",
+  "Lux Fae":"tft18_lux","Lux Coven":"tft18_lux","Lux Solar":"tft18_lux","Lux Primal":"tft18_lux",
+  "Lux Blackthorn":"tft18_lux","Lux Blossom":"tft18_lux","Lux Inferno":"tft18_lux",
+  "Lux Elderwood":"tft18_lux","Lux Lunar":"tft18_lux",
+  "Mama Beak":"tft18_raptor","Elder Dragon":"tft18_elderdragon",Alune:"tft18_alune"
+};
+const U={
+  Akali:{cn:"阿卡丽",cost:1,traits:["Inferno","Adaptor","Ravager"],slots:1},
+  Camille:{cn:"卡蜜尔",cost:1,traits:["Coven","Ravager"],slots:1},
+  Cinderling:{cn:"绯红树怪",cost:1,traits:["Riftbeast","Hunter"],slots:1},
+  Karma:{cn:"卡尔玛",cost:1,traits:["Blossom","Spellweaver"],slots:1},
+  Kobuko:{cn:"可酷伯",cost:1,traits:["Sprykin","Brawler"],slots:1},
+  Leona:{cn:"蕾欧娜",cost:1,traits:["Solar","Defender"],slots:1},
+  Ornn:{cn:"奥恩",cost:1,traits:["Elderwood","Defender"],slots:1},
+  Pebbles:{cn:"苍蓝哨戒",cost:1,traits:["Riftbeast","Invoker"],slots:1},
+  Rakan:{cn:"洛",cost:1,traits:["Fae","Juggernaut","Vanguard"],slots:1},
+  "Rek'Sai":{cn:"雷克塞",cost:1,traits:["Blackthorn","Brawler"],slots:1},
+  Varus:{cn:"韦鲁斯",cost:1,traits:["Inferno","Rapidfire"],slots:1},
+  Veigar:{cn:"维迦",cost:1,traits:["Blackthorn","Sprykin","Spellweaver"],slots:1},
+  Xayah:{cn:"霞",cost:1,traits:["Elderwood","Fae","Rapidfire"],slots:1},
+  Yorick:{cn:"约里克",cost:1,traits:["Blossom","Juggernaut","Summoner"],slots:1},
+  Alistar:{cn:"阿利斯塔",cost:2,traits:["Elderwood","Brawler"],slots:1},
+  Caitlyn:{cn:"凯特琳",cost:2,traits:["Coven","Hunter"],slots:1},
+  Elise:{cn:"伊莉丝",cost:2,traits:["Coven","Vanguard"],slots:1},
+  Gromp:{cn:"魔沼蛙",cost:2,traits:["Riftbeast","Adaptor"],slots:1},
+  Kayle:{cn:"凯尔",cost:2,traits:["Solar","Rapidfire"],slots:1},
+  LeBlanc:{cn:"乐芙兰",cost:2,traits:["Elderwood","Spellweaver"],slots:1},
+  Murkwolf:{cn:"暗影狼",cost:2,traits:["Riftbeast","Ravager"],slots:1},
+  Scuttlecrab:{cn:"峡谷迅捷蟹",cost:2,traits:["Riftbeast","Juggernaut"],slots:1},
+  Sejuani:{cn:"瑟庄妮",cost:2,traits:["Solar","Juggernaut"],slots:1},
+  Shen:{cn:"慎",cost:2,traits:["Inferno","Defender"],slots:1},
+  Teemo:{cn:"提莫",cost:2,traits:["Sprykin","Invoker"],slots:1},
+  Warwick:{cn:"沃里克",cost:2,traits:["Blackthorn","Ravager"],slots:1},
+  Yunara:{cn:"芸阿娜",cost:2,traits:["Blossom","Executioner"],slots:1},
+  Azir:{cn:"阿兹尔",cost:3,traits:["Blackthorn","Executioner","Summoner"],slots:1},
+  Cassiopeia:{cn:"卡西奥佩娅",cost:3,traits:["Coven","Spellweaver"],slots:1},
+  Diana:{cn:"黛安娜",cost:3,traits:["Lunar","Ravager","Vanguard"],slots:1},
+  Fiddlesticks:{cn:"费德提克",cost:3,traits:["Flora Fatalis","Defender","Spellweaver"],slots:1},
+  Hecarim:{cn:"赫卡里姆",cost:3,traits:["Elderwood","Vanguard"],slots:1},
+  "Kha'Zix":{cn:"卡兹克",cost:3,traits:["Rival"],slots:1},
+  "Kog'Maw":{cn:"克格莫",cost:3,traits:["Caustic","Invoker","Adaptor"],slots:1},
+  Krug:{cn:"远古石甲虫",cost:3,traits:["Riftbeast","Brawler"],slots:1},
+  "Master Yi":{cn:"易",cost:3,traits:["Blossom","Adaptor"],slots:1},
+  Rammus:{cn:"拉莫斯",cost:3,traits:["Sprykin","Defender"],slots:1},
+  "Mama Beak":{cn:"深红锋喙鸟",cost:3,traits:["Riftbeast","Summoner","Rapidfire"],slots:1},
+  Rengar:{cn:"雷恩加尔",cost:3,traits:["Rival"],slots:1},
+  Tristana:{cn:"崔丝塔娜",cost:3,traits:["Fae","Sprykin","Hunter"],slots:1},
+  Vi:{cn:"蔚",cost:3,traits:["Primal","Juggernaut"],slots:1},
+  Ahri:{cn:"阿狸",cost:4,traits:["Blossom","Spellweaver"],slots:1},
+  Amumu:{cn:"阿木木",cost:4,traits:["Inferno","Juggernaut"],slots:1},
+  Sentinel:{cn:"苍蓝雕纹魔像",cost:4,traits:["Riftbeast","Vanguard","Invoker"],slots:1},
+  Aphelios:{cn:"厄斐琉斯",cost:4,traits:["Lunar","Rapidfire"],slots:1},
+  Brambleback:{cn:"绯红印记树怪",cost:4,traits:["Riftbeast","Ravager"],slots:1},
+  Ezreal:{cn:"伊泽瑞尔",cost:4,traits:["Elderwood","Executioner"],slots:1},
+  Lillia:{cn:"莉莉娅",cost:4,traits:["Fae","Defender"],slots:1},
+  Malphite:{cn:"墨菲特",cost:4,traits:["Blackthorn","Monolith"],slots:1},
+  Morgana:{cn:"莫甘娜",cost:4,traits:["Coven","Invoker"],slots:1},
+  Nidalee:{cn:"奈德丽",cost:4,traits:["Primal","Adaptor"],slots:1},
+  Sett:{cn:"瑟提",cost:4,traits:["Blossom","Brawler"],slots:1},
+  Sivir:{cn:"希维尔",cost:4,traits:["Primal","Hunter"],slots:1},
+  Soraka:{cn:"索拉卡",cost:4,traits:["Flora Fatalis","Executioner"],slots:1},
+  Zyra:{cn:"婕拉",cost:4,traits:["Thornmaiden","Summoner"],slots:1},
+  Alune:{cn:"拉露恩",cost:5,traits:["Attuned","Lunar","Spellweaver"],slots:1},
+  Ashe:{cn:"艾希",cost:5,traits:["Blossom","Hunter"],slots:1},
+  Draven:{cn:"德莱文",cost:5,traits:["Bounty Seeker"],slots:1},
+  "Elder Dragon":{cn:"远古巨龙",cost:5,traits:["Riftbeast","Apex Predator"],slots:2},
+  Gnar:{cn:"纳尔",cost:5,traits:["Elderwood","Sprykin","Brawler"],slots:1},
+  Ivern:{cn:"艾翁",cost:5,traits:["Greenfather"],slots:1},
+  Kennen:{cn:"凯南",cost:5,traits:["Inferno","Executioner"],slots:1},
+  Maokai:{cn:"茂凯",cost:5,traits:["Old Growth","Juggernaut"],slots:1},
+  Taric:{cn:"塔里克",cost:5,traits:["Emerald Aspect","Vanguard"],slots:1}
+};
+const LUX={
+  "Lux Fae":{cn:"拉克丝·花仙子",origin:"Fae"},
+  "Lux Coven":{cn:"拉克丝·魔女",origin:"Coven"},
+  "Lux Solar":{cn:"拉克丝·日曜",origin:"Solar"},
+  "Lux Primal":{cn:"拉克丝·野兽",origin:"Primal"},
+  "Lux Blackthorn":{cn:"拉克丝·黑荆棘",origin:"Blackthorn"},
+  "Lux Blossom":{cn:"拉克丝·莲华",origin:"Blossom"},
+  "Lux Inferno":{cn:"拉克丝·地狱火",origin:"Inferno"},
+  "Lux Elderwood":{cn:"拉克丝·永恒森",origin:"Elderwood"},
+  "Lux Lunar":{cn:"拉克丝·月蚀",origin:"Lunar"}
+};
+
+const esc=(s)=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+/** 英雄头像：优先 tactics.tools 面部图，其次 Community Dragon square，不再用技能方图 */
+function unitSrc(k){
+  if(FACE[k]) return FACE_BASE+FACE[k];
+  if(CD[k]) return CD_BASE+CD[k]+"/hud/"+CD[k]+"_square.png";
+  return "";
+}
+function unitFb(k){
+  if(CD[k]) return CD_BASE+CD[k]+"/hud/"+CD[k]+"_square.png";
+  if(FACE[k]) return FACE_BASE+FACE[k];
+  return "";
+}
+function unitName(k){return U[k]?U[k].cn:(LUX[k]?LUX[k].cn:k);}
+
+/** 羁绊图标 + 悬停中文 */
+function traitIco(t, cls){
+  const src=TICO[t]||"";
+  const cn=CN[t]||t;
+  const bp=BP[t]?` · ${BP[t]}`:"";
+  return `<span class="ico ${cls||""}" title="${esc(cn)}">
+    <img src="${esc(src)}" alt="${esc(cn)}" loading="lazy"
+      onerror="this.style.opacity=.25" />
+    <span class="tip">${esc(cn)}${bp}</span>
+  </span>`;
+}
+function unitIco(k, emTraits){
+  const src=unitSrc(k), fb=unitFb(k), name=unitName(k);
+  const ts=(U[k]?U[k].traits:(LUX[k]?[LUX[k].origin,"Avatar"]:[]));
+  const tip=name;
+  const emHtml=(emTraits||[]).map(t=>`<img src="${esc(TICO[t]||"")}" alt="" title="${esc(CN[t]||t)}" />`).join("");
+  return `<span class="ico unit ${LUX[k]?"lux":""} ${emTraits&&emTraits.length?"em":""}" title="${esc(tip)}">
+    <img src="${esc(src)}" alt="${esc(name)}" loading="lazy"
+      onerror="this.onerror=null;this.src='${esc(fb)}'" />
+    <span class="tip">${esc(tip)}</span>
+    ${emHtml?`<span style="position:absolute;bottom:-2px;right:-2px;display:flex;gap:1px">${emHtml}</span>`:""}
+  </span>`;
+}
+
+/* ===== optimizer (compact) ===== */
+const TK=Object.keys(BP);
+/**
+ * Set18 官方 equip.js：有纹章的羁绊（可转职 / 重铸池）
+ * 数据源 game.gtimg.cn .../js/equip.js season 2026.S18
+ * 可转职：Brawler/Defender/Executioner/Hunter/Invoker/Juggernaut/Rapidfire/
+ *         Ravager/Spellweaver/Vanguard + Blossom/Coven/Elderwood/Blackthorn/
+ *         Fae/Flora Fatalis/Inferno/Lunar/Primal/Sprykin
+ * 无纹章：Adaptor/Summoner/Riftbeast/Solar/Rival 及全部唯一羁绊
+ */
+const EMBLEMABLE=new Set([
+  "Brawler","Defender","Executioner","Hunter","Invoker","Juggernaut",
+  "Rapidfire","Ravager","Spellweaver","Vanguard",
+  "Blossom","Coven","Elderwood","Blackthorn","Fae","Flora Fatalis",
+  "Inferno","Lunar","Primal","Sprykin"
+]);
+const NO_EMBLEM=TK.filter(t=>!EMBLEMABLE.has(t));
+function nuList(k){return (U[k]||{traits:[]}).traits.filter(t=>!UNIQUE.has(t));}
+function makePool(){return Object.keys(U).filter(n=>nuList(n).length>0||n==="Elder Dragon");}
+function activeBPs(r,f){const bp=Object.assign({},BP);if(!r)delete bp.Rival;if(!f)delete bp["Flora Fatalis"];return bp;}
+function native(h){return h in U?U[h].traits:[LUX[h].origin];}
+
+function evaluate(units,lux,opt){
+  const maxS=opt.maxSlots,bp=opt.bp;
+  let slots=0;
+  for(const n of units){if(!U[n])return null;slots+=U[n].slots;}
+  if(lux)slots+=1;
+  if(slots>maxS)return null;
+  if(units.filter(n=>n==="Kha'Zix"||n==="Rengar").length>1)return null;
+  const all={};for(const t of TK)all[t]=0;
+  const bump=(t,v=1)=>{if(t in all)all[t]+=v;};
+  for(const n of units){
+    for(const t of U[n].traits)if(!UNIQUE.has(t))bump(t);
+    if(n==="Elder Dragon")bump("Riftbeast",2);
+  }
+  if(lux)bump(LUX[lux].origin,opt.luxDouble?2:1);
+  const already=[];for(const t of Object.keys(bp))if(all[t]>=bp[t])already.push(t);
+  let emb=[],add=[];
+  const board=units.concat(lux?[lux]:[]);
+  const has=(h,t)=>native(h).includes(t)|| (LUX[h]&&LUX[h].origin===t);
+  if(opt.emblemMode!=="none"){
+    const maxEm=opt.emblemMode==="any1"?1:opt.emblemMode==="any2"?2:opt.fixedEmblems.length;
+    const allow=opt.emblemMode==="fixed"
+      ? new Set((opt.fixedEmblems||[]).filter(t=>EMBLEMABLE.has(t)))
+      : new Set(EMBLEMABLE);
+    const f1=[];
+    for(const t of allow){
+      if(!(t in bp))continue;
+      if(bp[t]-all[t]===1){
+        const elig=board.filter(u=>!has(u,t));
+        if(elig.length)f1.push({t,elig});
+      }
+    }
+    if(maxEm>=2&&f1.length>=2){
+      outer:for(let i=0;i<f1.length;i++)for(let j=i+1;j<f1.length;j++){
+        if(f1[i].t===f1[j].t)continue;
+        for(const a of f1[i].elig)for(const b of f1[j].elig)if(a!==b){
+          emb=[[a,f1[i].t],[b,f1[j].t]];add=[f1[i].t,f1[j].t];break outer;
+        }
+      }
+    }
+    if(!emb.length&&f1.length&&maxEm>=1){emb=[[f1[0].elig[0],f1[0].t]];add=[f1[0].t];}
+    if(!emb.length&&maxEm>=2){
+      for(const t of allow){
+        if(!(t in bp)||bp[t]-all[t]!==2)continue;
+        const elig=board.filter(u=>!has(u,t));
+        if(elig.length>=2){emb=[[elig[0],t],[elig[1],t]];add=[t];break;}
+      }
+    }
+  }
+  const fin=Object.assign({},all);for(const e of emb)fin[e[1]]+=1;
+  const actSet=new Set(already);
+  for(const t of Object.keys(bp))if(fin[t]>=bp[t])actSet.add(t);
+  const act=[...actSet].filter(t=>fin[t]>=bp[t]);
+  let luxEff=false;
+  if(lux){
+    const c2={};for(const t of TK)c2[t]=0;
+    for(const n of units){
+      for(const t of U[n].traits)if(!UNIQUE.has(t))c2[t]++;
+      if(n==="Elder Dragon")c2.Riftbeast+=2;
+    }
+    let n2=0;for(const t of Object.keys(bp))if(c2[t]>=bp[t])n2++;
+    luxEff=act.length>n2;
+  }
+  let score=act.length*100+(lux&&luxEff?10:0)+(!lux?1:0)+(opt.preferLux&&lux&&luxEff?2:0);
+  return{score,n:act.length,units:units.slice(),lux,slots,emblems:emb,act:act.sort(),counts:fin,base:already.sort(),add,luxEffective:luxEff};
+}
+
+function localSearch(cur,opt,POOL,fast){
+  if(!cur)return cur;
+  let rounds=0,imp=true;
+  while(imp&&rounds<(fast?8:22)){
+    imp=false;rounds++;
+    const units=cur.units.slice(),lux=cur.lux;
+    const rms=units.concat(lux?[lux]:[]);
+    for(const rm of rms){
+      for(const a of POOL){
+        if(a===rm||units.includes(a)||a===lux)continue;
+        let tu=units.slice(),tl=lux;
+        if(LUX[rm])tl=null;else tu=units.filter(x=>x!==rm);
+        if(LUX[a]){if(tl)continue;tl=a;}else tu=tu.concat([a]);
+        const r=evaluate(tu,tl,opt);
+        if(r&&r.score>cur.score){cur=r;imp=true;break;}
+      }
+      if(imp)break;
+    }
+    if(imp)continue;
+    for(const a of POOL.concat(opt.luxDouble?Object.keys(LUX):[])){
+      if(units.includes(a)||a===lux)continue;
+      if(LUX[a]&&lux)continue;
+      const sc=LUX[a]?1:U[a].slots;
+      if(cur.slots+sc>opt.maxSlots)continue;
+      const r=LUX[a]?evaluate(units,a,opt):evaluate(units.concat([a]),lux,opt);
+      if(r&&r.score>cur.score){cur=r;imp=true;break;}
+    }
+  }
+  return cur;
+}
+function applyLux(units,opt,cur){
+  let best=cur||null;
+  const cons=r=>{if(r&&(!best||r.score>best.score))best=r;};
+  cons(evaluate(units,null,opt));
+  if(opt.luxDouble){
+    const sl=units.reduce((s,n)=>s+U[n].slots,0);
+    if(sl+1<=opt.maxSlots)for(const lx of Object.keys(LUX))cons(evaluate(units,lx,opt));
+    for(let i=0;i<units.length;i++){
+      const tu=units.filter((_,j)=>j!==i);
+      for(const lx of Object.keys(LUX))cons(evaluate(tu,lx,opt));
+    }
+  }
+  if(best&&best.lux&&best.luxEffective===false)cons(evaluate(best.units.filter(x=>!LUX[x]),null,opt));
+  return best;
+}
+
+function search(opt){
+  const POOL=makePool();const fast=!!opt.fast;
+  let best=null;
+  const cons=r=>{if(r&&(!best||r.score>best.score))best=r;};
+  const consTeam=team=>{
+    if(!team||!team.some(n=>U[n]))return;
+    const sl=team.reduce((s,n)=>s+(U[n]?U[n].slots:0),0);
+    if(sl>opt.maxSlots)return;
+    cons(evaluate(team,null,opt));
+    if(opt.luxDouble){
+      if(sl+1<=opt.maxSlots)for(const lx of Object.keys(LUX))cons(evaluate(team,lx,opt));
+      for(let i=0;i<team.length;i++){
+        const tu=team.filter((_,j)=>j!==i);
+        for(const lx of Object.keys(LUX))cons(evaluate(tu,lx,opt));
+      }
+    }
+  };
+  [
+    ["Pebbles","Fiddlesticks","Sentinel","Mama Beak","Azir","Veigar","Diana","Aphelios","Akali","Kennen"],
+    ["Pebbles","Fiddlesticks","Sentinel","Mama Beak","Azir","Veigar","Diana","Aphelios","Akali","Kennen","Lillia"],
+    ["Rakan","Yorick","Shen","Warwick","Azir","Diana","Fiddlesticks","Kennen","Alune","Morgana"],
+    ["Akali","Varus","Shen","Kennen","Amumu","Camille","Murkwolf","Warwick","Diana","Fiddlesticks","Rakan"],
+    ["Rakan","Yorick","Karma","Yunara","Ahri","Sett","Kobuko","Tristana","Caitlyn","Fiddlesticks","Soraka"],
+    ["Xayah","Rakan","Kayle","Leona","Sejuani","Ornn","Alistar","Ezreal","Gnar","Hecarim","LeBlanc"],
+    ["Caitlyn","Camille","Elise","Cassiopeia","Morgana","Rakan","Yunara","Fiddlesticks","Soraka","Yorick","Karma"],
+    ["Akali","Gromp","Kog'Maw","Master Yi","Nidalee","Rakan","Vi","Veigar","Warwick","Fiddlesticks","Kennen"],
+  ].forEach(consTeam);
+  if(best)best=localSearch(best,opt,POOL,fast);
+  if(best)best=applyLux(best.units.filter(x=>!LUX[x]),opt,best);
+  let rng=123456789;const rand=()=>{rng=(rng*1664525+1013904223)>>>0;return rng/4294967296;};
+  const restarts=fast?200:600;
+  for(let r=0;r<restarts;r++){
+    const team=[];let slots=0;const c={};TK.forEach(t=>c[t]=0);
+    const cap=Math.max(0,opt.maxSlots-(opt.luxDouble?1:0));
+    while(slots<cap){
+      let pick=null,bg=-1e9;
+      for(const n of POOL){
+        if(team.includes(n))continue;
+        if((n==="Kha'Zix"||n==="Rengar")&&team.some(x=>x==="Kha'Zix"||x==="Rengar"))continue;
+        if(slots+U[n].slots>cap)continue;
+        let g=rand()*.25;const tr=Object.assign({},c);
+        for(const t of nuList(n))tr[t]=(tr[t]||0)+1;
+        if(n==="Elder Dragon")tr.Riftbeast=(tr.Riftbeast||0)+2;
+        for(const t of Object.keys(opt.bp)){
+          const b=opt.bp[t],a=c[t]||0,z=tr[t]||0;
+          if(a<b&&z>=b)g+=6;else if(a<b-1&&z===b-1)g+=3.2;else if(a<b&&z>a)g+=.4;
+        }
+        if(g>bg){bg=g;pick=n;}
+      }
+      if(!pick)break;
+      team.push(pick);slots+=U[pick].slots;
+      for(const t of nuList(pick))c[t]=(c[t]||0)+1;
+      if(pick==="Elder Dragon")c.Riftbeast=(c.Riftbeast||0)+2;
+    }
+    consTeam(team);
+  }
+  if(best)best=localSearch(best,opt,POOL,fast);
+  if(best)best=applyLux(best.units.filter(x=>!LUX[x]),opt,best);
+  return best;
+}
+
+/* ===== UI ===== */
+function fillEmChips(){
+  const box=document.getElementById("emblemChips");
+  box.innerHTML="";
+  EMBLEMABLE.forEach(t=>{
+    const d=document.createElement("div");
+    d.className="chip";
+    d.dataset.t=t;
+    if(["Fae","Coven","Adaptor","Defender"].includes(t))d.classList.add("on");
+    d.innerHTML=`<img src="${esc(TICO[t]||"")}" alt="" /><span>${esc(CN[t]||t)}</span>`;
+    d.onclick=()=>d.classList.toggle("on");
+    box.appendChild(d);
+  });
+}
+
+function render(res,opt){
+  const el=document.getElementById("resultBody");
+  if(!res){el.innerHTML=`<div class="empty">未找到可行阵容</div>`;return;}
+
+  const actIco=res.act.map((t,i)=>traitIco(t,"ok").replace("></span>",` style="animation-delay:${i*30}ms"></span>`)).join("");
+
+  const emMap={};
+  (res.emblems||[]).forEach(([u,t])=>{(emMap[u]=emMap[u]||[]).push(t);});
+
+  const boardList=[...res.units, res.lux].filter(Boolean);
+  const slotsHtml=boardList.map((k,i)=>{
+    const src=unitSrc(k),fb=unitFb(k),name=unitName(k);
+    const cost=(U[k]?U[k].cost:5);
+    const showT=U[k]?U[k].traits:[LUX[k].origin];
+    const ems=emMap[k]||[];
+    const hasEm=ems.length>0;
+    const tIco=showT.filter(t=>TICO[t]).map(t=>
+      `<img src="${esc(TICO[t])}" title="${esc(CN[t]||t)}" alt="" loading="lazy" />`
+    ).join("");
+    const eIco=ems.map(t=>
+      `<img class="em" src="${esc(TICO[t]||"")}" title="转职 · ${esc(CN[t]||t)}" alt="" loading="lazy" />`
+    ).join("");
+    return `<div class="slot${hasEm?" has-em":""}" style="animation-delay:${i*40}ms" title="${esc(name)}${hasEm?" · 带转职":""}">
+      <span class="cost">${cost}</span>
+      <img class="ava" src="${esc(src)}" alt="${esc(name)}" loading="lazy"
+        onerror="this.onerror=null;this.src='${esc(fb)}'" />
+      <div class="uname">${esc(name)}</div>
+      <div class="trait-row">${tIco}${eIco}</div>
+    </div>`;
+  }).join("");
+
+  // 转职分配说明卡
+  const emCards=(res.emblems||[]).map(([u,t],i)=>{
+    const src=unitSrc(u),fb=unitFb(u);
+    return `<div class="em-card" style="animation-delay:${i*40}ms">
+      <img class="ava" src="${esc(src)}" alt="" loading="lazy"
+        onerror="this.onerror=null;this.src='${esc(fb)}'" />
+      <img class="tico" src="${esc(TICO[t]||"")}" alt="" loading="lazy"
+        title="${esc(CN[t]||t)}" />
+      <div class="txt">
+        <b>${esc(unitName(u))}</b>
+        <span>获得转职 · ${esc(CN[t]||t)}</span>
+      </div>
+    </div>`;
+  }).join("");
+
+  const modeTxt={
+    none:"无转职", any1:"任意转职 ×1", any2:"任意转职 ×2",
+    fixed:"指定转职："+(opt.fixedEmblems||[]).map(t=>CN[t]||t).join("、")
+  }[opt.emblemMode]||"";
+
+  const baseTxt=(res.base||[]).map(t=>CN[t]||t).join("、")||"—";
+  const addTxt=(res.add||[]).map(t=>CN[t]||t).join("、")||"—";
+
+  const actLegend=res.act.map(t=>traitIco(t)).join("");
+
+  el.innerHTML=`
+    <div class="score-row">
+      <div class="score-num">${res.n}</div>
+      <div class="score-meta">
+        非唯一羁绊<br/>
+        人口 <b>${res.slots}</b>/${opt.maxSlots}
+        · 转职 <b>${(res.emblems||[]).length}</b>
+        · 双计 <b>${opt.luxDouble?"开":"关"}</b><br/>
+        底板 <b>${(res.base||[]).length}</b> 条 · 转职补齐 <b>${(res.add||[]).length}</b> 条
+      </div>
+    </div>
+
+    <div class="em-panel">
+      <div class="panel-title">转职分配 · ${esc(modeTxt)}</div>
+      ${emCards?`<div class="em-list">${emCards}</div>`:`<div class="em-empty">本阵容未使用转职</div>`}
+      <div class="note-row">
+        棋子下方<b>发光图标</b>=转职羁绊 · 普通图标=自带羁绊（悬停看中文名）<br/>
+        底板已激活：${esc(baseTxt)}<br/>
+        转职补齐：${esc(addTxt)}
+      </div>
+    </div>
+
+    <div class="panel-title">已激活羁绊 ${res.act.length}</div>
+    <div class="strip">${actIco}</div>
+
+    <div class="panel-title">阵容</div>
+    <div class="board">${slotsHtml}</div>
+
+    <div class="panel-title" style="margin-top:14px">Activated</div>
+    <div class="legend">${actLegend}</div>
+  `;
+}
+
+fillEmChips();
+document.getElementById("emblemMode").addEventListener("change",e=>{
+  document.getElementById("fixedBox").style.display=e.target.value==="fixed"?"block":"none";
+});
+document.getElementById("btnRun").addEventListener("click",()=>{
+  const btn=document.getElementById("btnRun"),status=document.getElementById("status");
+  const maxSlots=Math.max(1,Math.min(20,parseInt(document.getElementById("slots").value,10)||11));
+  const emblemMode=document.getElementById("emblemMode").value;
+  const luxDouble=document.getElementById("luxMode").value==="on";
+  const fixedEmblems=emblemMode==="fixed"
+    ?[...document.querySelectorAll("#emblemChips .chip.on")].map(x=>x.dataset.t).filter(t=>EMBLEMABLE.has(t)):[];
+  if(emblemMode==="fixed"&&!fixedEmblems.length){status.textContent="请选择指定羁绊";return;}
+  const countRival=document.getElementById("countRival").checked;
+  const countFlora=document.getElementById("countFlora").checked;
+  const opt={
+    maxSlots,emblemMode,luxDouble,fixedEmblems,countRival,countFlora,
+    preferLux:document.getElementById("preferLux").checked,
+    fast:document.getElementById("fastMode").checked,
+    bp:activeBPs(countRival,countFlora)
+  };
+  btn.disabled=true;status.textContent="搜索中…";
+  setTimeout(()=>{
+    try{
+      const t0=performance.now();
+      const best=search(opt);
+      const ms=Math.round(performance.now()-t0);
+      render(best,opt);
+      status.textContent=best?`${best.n} 条 · ${best.slots}/${maxSlots} · ${ms}ms`:`无解 · ${ms}ms`;
+    }catch(err){status.textContent="出错："+err.message;console.error(err);}
+    finally{btn.disabled=false;}
+  },20);
+});
+</script>
+</body>
+</html>
