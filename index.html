@@ -218,7 +218,8 @@ select:focus,input[type=number]:focus{border-color:#fff}
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 .ava{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #fff;display:block}
-.aname{font-weight:800;font-size:18px}
+.aname{font-weight:800;font-size:18px;color:#fff;text-decoration:none;display:inline-block}
+.aname:hover{text-decoration:underline}
 .aname i{
   display:inline-block;width:6px;height:6px;border-radius:50%;background:#fff;margin-left:8px;
   animation:pulse 1.6s ease-in-out infinite;font-style:normal;vertical-align:middle;
@@ -306,12 +307,8 @@ select:focus,input[type=number]:focus{border-color:#fff}
       <img class="ava" src="https://avatars.githubusercontent.com/u/61241144?v=4" alt="Crait7" />
     </div>
     <div>
-      <div class="aname">Crait7<i></i></div>
-      <div class="arole">S18羁绊天梯 · Creator</div>
-      <div class="alinks">
-        <a href="https://github.com/Crait7" target="_blank" rel="noreferrer">GitHub</a>
-        <a href="https://github.com/Crait7" target="_blank" rel="noreferrer">@Crait7</a>
-      </div>
+      <a class="aname" href="https://github.com/Crait7" target="_blank" rel="noreferrer">Crait7<i></i></a>
+      <div class="arole">S18羁绊天梯 · Creator · GitHub</div>
     </div>
   </div>
   <div class="afoot">C R A I T 7 · S 1 8 · T R A I T</div>
@@ -823,9 +820,6 @@ function render(res,opt){
 
     <div class="panel-title">阵容</div>
     <div class="board">${slotsHtml}</div>
-
-    <div class="panel-title" style="margin-top:14px">Activated</div>
-    <div class="legend">${actLegend}</div>
   `;
 }
 
